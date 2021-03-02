@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+    <head>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <div id="header">
+            <h1 id="drum">
+                There is nothing plugged in :(
+            </h1>
+        </div>
+        <div id="container"> 
+            <button onclick="spotify()">connect to spotify</button>
+            <button onclick="nextSong()">next</button>
+            <button onClick="getDevices()">get devices</button>
+            <script>
+            var redAudio = new Audio('CYCdh_LudSnrA-01.wav');
+            var yellowAudio = new Audio('808-tom-29.wav');
+            var blueAudio = new Audio('CYCdh_Sab_ClHat-04.wav');
+            var greenAudio = new Audio('808-tom-11.wav');
+            var kickAudio =new Audio('CYCdh_AcouKick-06.wav');
+            var testAudio = new Audio('cablebox.mp3')
+            blueAudio.volume = .5
+            yellowAudio.volume = .3
+            greenAudio.volume = .3
+    /*      var blueAudio = new Audio('CYCdh_LudSnrA-01.wav');
+            var yellowAudio = new Audio('CYCdh_LudSnrA-01.wav');
+            var greenAudio = new Audio('CYCdh_LudSnrA-01.wav');
+            var kickAudio = new Audio('CYCdh_LudSnrA-01.wav');
+    */        
+
+
+            var spotifyId
+            var token = "Bearer BQD-y-rY-axQ0bDASJ8uZP1eaPm9TRnfpTRC0Y8NQfiEmYaA4o3O7kfcoO_I06-KWtFNaeXaDRWdimiNMbm1ucBh29Q4Rkn0P6XkTZqmdDJng6ZymHG4EgvgV3LqUSLPtQyMN43kYhB0g_Jw6-c"
+            function spotify(){
+                /*fetch("https://accounts.spotify.com/authorize/f65d8d1d39c84f0f9799275783bc064a")
+                    .then(response => response.json())
+                console.log(response)
+                */
+                let myHeaders = new Headers();
+                myHeaders.append("Content-Type", "application/json");
+                myHeaders.append("Authorization", token);
+                const myInit = {
+                    method: 'GET',
+                    headers: myHeaders
+                };
+                fetch("https://api.spotify.com/v1/me/player/currently-playing", myInit)
+                    .then(response => response.json())
+                    .then(data => console.log(data))
+            }
+
+            function nextSong(){
+                let myHeaders = new Headers();
+                myHeaders.append("Accept", "application/json")
+                myHeaders.append("Content-Type", "application/json");
+                myHeaders.append("Authorization", token);
+                const myInit = {
+                    method: 'POST',
+                    headers: myHeaders
+                };
+                fetch("https://api.spotify.com/v1/me/player/next?device_id=".concat(spotifyId), myInit)
+            }
+
+            function getDevices(){
+                var devices
+                let myHeaders = new Headers();
+                myHeaders.append("Content-Type", "application/json");
+                myHeaders.append("Authorization", token);
+                const myInit = {
+                    method: 'GET',
+                    headers: myHeaders
+                };
+                fetch("https://api.spotify.com/v1/me/player/devices", myInit)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data)
+                        for(var i=0; i<2; i++){
+                            if(data["devices"][i]["is_active"]){
+                                spotifyId = data["devices"][i]["id"]
+                            }
+                        }
+                        })
+            }
+
+            var recording = false
+            var recorded = []
+            var playing = false
+
+            function record(){
+                recording = true;
+                recorded = []
+            }
+
+            function play(){
+                playing = true;
+            }
+
+            var gamepadInfo = document.getElementById("drum")
+            window.addEventListener("gamepadconnected", (event) => {
+                console.log("A gamepad connected:");
+                var gp = navigator.getGamepads()[event.gamepad.index];
+                document.getElementById("container").style.backgroundImage = "url(cat.jpg)"
+                gamepadInfo.innerHTML = "This is now an Electric Drumset!";
+                gameLoop();
+            });
+
+            window.addEventListener("gamepaddisconnected", (event) => {
+                console.log("A gamepad disconnected:");
+                console.log(event.gamepad);
+            });
+
+            var interval;
+            var oldPressed
+            var temp = 1
+            if (!('ongamepadconnected' in window)) {
+                interval = setInterval(pollGamepads, 500);
+            }
+
+            function pollGamepads() {
+                var gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads : []);
+                for (var i = 0; i < gamepads.length; i++) {
+                    var gp = gamepads[i];
+                    if (gp) {
+                        gamepadInfo.innerHTML = "This is now an Electric Drumset!";
+                    gameLoop();
+                    clearInterval(interval);
+                    }
+                }
+            }
+            var sauce
+            function gameLoop() {
+                var gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads : []);
+                if (!gamepads) {
+                    return;
+                }
+                var pressed = []
+                var gp = gamepads[0];
+                if(temp == 1){
+                    temp += 1
+                    oldPressed = [false, false, false, false, false]
+                }
+                if(!playing){
+                    pressed[2] = gp.buttons[0].pressed
+                    pressed[3] = gp.buttons[1].pressed
+                    pressed[0] = gp.buttons[2].pressed
+                    pressed[1] = gp.buttons[3].pressed
+                    pressed[4] = gp.buttons[4].pressed
+                    pressed[5] = gp.buttons[8].pressed
+                    pressed[6] = gp.buttons[9].pressed
+                }else{
+                    if(recorded.length == 1){
+                        playing = false
+                    }
+                    pressed = recorded.shift()
+                }
+
+
+
+
+
+                if (pressed[2] && oldPressed[2] == false) {
+                    blueAudio.currentTime = 0
+                    blueAudio.play();
+                }
+                if (pressed[3] && oldPressed[3] == false) {
+                    greenAudio.play();
+                    greenAudio.currentTime = 0
+                }
+                if (pressed[0] && oldPressed[0] == false) {
+                    redAudio.play();
+                    redAudio.currentTime = 0
+                }
+                if (pressed[1] && oldPressed[1] == false) {
+                    yellowAudio.play();
+                    yellowAudio.currentTime = 0
+                }
+                if (pressed[4] && oldPressed[4] == false) {
+                    kickAudio.play();
+                    kickAudio.currentTime = 0
+                }
+                if(pressed[5] && oldPressed[5] == false){
+                    if(!recording){
+                        record()
+                        console.log("Recording")
+                    }else{
+                        recording = false
+                    }
+                }
+                if(pressed[6] && oldPressed[6] == false){
+                    if(recorded.length != 0){
+                        console.log("Playing")
+                        var count = 0
+                        while(true){
+                            if(recorded[count][5] == true){
+                                recorded.shift()
+                            }else{
+                                break
+                            }
+                        }
+                        temp = 0
+                        play()
+                    }
+                }
+                if(recording){
+                    recorded.push(pressed)
+                }
+                oldPressed = pressed
+                if(sauce){
+                    console.log(178, recorded.length)
+                }start = requestAnimationFrame(gameLoop);
+                //console.log("hi")
+                
+            }
+            
+            //while(true){
+            //    if(game)
+            //}
+            </script>
+        </div>
+    </body>
+</html>
