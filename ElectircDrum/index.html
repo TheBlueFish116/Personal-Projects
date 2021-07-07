@@ -15,11 +15,14 @@
             <script>
             var redAudio = new Audio('CYCdh_LudSnrA-01.wav');
             var yellowAudio = new Audio('808-tom-29.wav');
-            var blueAudio = new Audio('CYCdh_Sab_ClHat-04.wav');
+            var blueAudio;
+            var crash = new Audio('CYCdh_K4-Trash10.wav'); 
+            var hihat = new Audio('CYCdh_Sab_ClHat-04.wav');
             var greenAudio = new Audio('808-tom-11.wav');
             var kickAudio =new Audio('CYCdh_AcouKick-06.wav');
             var testAudio = new Audio('cablebox.mp3')
-            blueAudio.volume = .5
+            hihat.volume = .5
+            crash.volume = .7
             yellowAudio.volume = .3
             greenAudio.volume = .3
     /*      var blueAudio = new Audio('CYCdh_LudSnrA-01.wav');
@@ -109,7 +112,8 @@
             });
 
             var interval;
-            var oldPressed
+            var oldPressed;
+            var greenWasPressed = false;
             var temp = 1
             if (!('ongamepadconnected' in window)) {
                 interval = setInterval(pollGamepads, 500);
@@ -146,32 +150,38 @@
                     pressed[4] = gp.buttons[4].pressed
                     pressed[5] = gp.buttons[8].pressed
                     pressed[6] = gp.buttons[9].pressed
+
                 }else{
                     if(recorded.length == 1){
                         playing = false
                     }
                     pressed = recorded.shift()
                 }
-
-
-
-
-
                 if (pressed[2] && oldPressed[2] == false) {
+                    if(greenWasPressed){
+                        blueAudio = crash;
+                    }else{
+                        blueAudio = hihat;
+                    }
                     blueAudio.currentTime = 0
                     blueAudio.play();
+                    greenWasPressed = false;
+
                 }
                 if (pressed[3] && oldPressed[3] == false) {
                     greenAudio.play();
                     greenAudio.currentTime = 0
+                    greenWasPressed = true;
                 }
                 if (pressed[0] && oldPressed[0] == false) {
                     redAudio.play();
                     redAudio.currentTime = 0
+                    greenWasPressed = false;
                 }
                 if (pressed[1] && oldPressed[1] == false) {
                     yellowAudio.play();
                     yellowAudio.currentTime = 0
+                    greenWasPressed = false
                 }
                 if (pressed[4] && oldPressed[4] == false) {
                     kickAudio.play();
@@ -206,7 +216,10 @@
                 oldPressed = pressed
                 if(sauce){
                     console.log(178, recorded.length)
-                }start = requestAnimationFrame(gameLoop);
+                }
+
+                
+                start = requestAnimationFrame(gameLoop);
                 //console.log("hi")
                 
             }
